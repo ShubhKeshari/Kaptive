@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Table, Thead, Tbody, Tr, Th, Td, Box } from "@chakra-ui/react";
 import data from "../../db.json";
 const months = [
@@ -15,7 +15,7 @@ const months = [
   "November",
   "December",
 ];
-const SimpleTable = ({ currency }) => {
+const PercentTable = () => {
   return (
     <Box maxHeight={"500px"} overflow={"scroll"} width="100%">
       <Table size="sm">
@@ -31,17 +31,18 @@ const SimpleTable = ({ currency }) => {
         </Thead>
         <Tbody>
           {data.Sheet1.map((obj, index) => {
+            const sum = Object.values(obj).reduce((acc, value) => {
+              if (!isNaN(value)) {
+                return acc + Number(value);
+              }
+              return acc;
+            }, 0);
             return (
               <Tr key={index}>
                 {Object.values(obj).map((value, i) => {
                   //To Check the value is a number
                   if (!isNaN(value)) {
-                    value =
-                      currency === "Rupees"
-                        ? parseFloat(value).toFixed(2)
-                        : currency === "Dollar"
-                        ? parseFloat(value / 86).toFixed(2)
-                        : parseFloat(value / 22).toFixed(2);
+                    value = ((parseFloat(value) / sum) * 100).toFixed(1)+ "%";
                   }
                   return (
                     <Td
@@ -63,4 +64,4 @@ const SimpleTable = ({ currency }) => {
   );
 };
 
-export { SimpleTable };
+export { PercentTable };
