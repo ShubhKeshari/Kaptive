@@ -7,6 +7,7 @@ import {
   Th,
   Td,
   TableContainer,
+  Box,
 } from "@chakra-ui/react";
 import data from "../../db.json";
 const months = [
@@ -25,6 +26,7 @@ const months = [
 ];
 const SimpleTable = () => {
   return (
+    <Box maxHeight={"300px"} overflowY={"auto"}>
     <TableContainer>
       <Table size="sm">
         <Thead>
@@ -63,6 +65,7 @@ const SimpleTable = () => {
         </Tbody>
       </Table>
     </TableContainer>
+    </Box>
   );
 };
 
