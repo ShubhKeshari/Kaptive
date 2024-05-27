@@ -1,7 +1,7 @@
 # Kaptive
 
 ## Introduction
-
+The Kaptive Dashboard features a responsive bar chart and data table to effectively visualize and manage company data. It's designed to provide clear insights and easy data interaction.
 
 ## Project Type
 
