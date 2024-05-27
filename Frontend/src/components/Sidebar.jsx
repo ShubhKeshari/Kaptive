@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   IconButton,
   Box,
@@ -21,24 +21,70 @@ import {
 import { FaRegUserCircle } from "react-icons/fa";
 import { BiSolidBinoculars } from "react-icons/bi";
 
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  NavLink,
-} from "react-router-dom";
 import BackgroundImg from "../assets/Background.jpg";
-import Table from "../pages/Table";
+import { Table } from "./Table";
+import { Charts } from "./Charts";
+import { Reports } from "./Reports";
+import { Forecast } from "./Forecast";
 
 const LinkItems = [
-  { name: "Charts", icon: FiBarChart2, path: "/charts" },
-  { name: "Tables", icon: FiTable, path: "/tables" },
-  { name: "Reports", icon: FiFileText, path: "/reports" },
-  { name: "Forecast", icon: BiSolidBinoculars, path: "/forecast" },
+  { name: "Charts", icon: FiBarChart2, path: "charts" },
+  { name: "Tables", icon: FiTable, path: "tables" },
+  { name: "Reports", icon: FiFileText, path: "reports" },
+  { name: "Forecast", icon: BiSolidBinoculars, path: "forecast" },
 ];
 
 export function Sidebar({ children }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [activeTab, setActiveTab] = useState("");
+
+  const chartsRef = useRef(null);
+  const tablesRef = useRef(null);
+  const reportsRef = useRef(null);
+  const forecastRef = useRef(null);
+
+  const scrollToSection = (sectionRef, tabName) => {
+    if (sectionRef.current) {
+      sectionRef.current.scrollIntoView({ behavior: "smooth" });
+      setActiveTab(tabName);
+      onClose();
+    }
+  };
+
+  useEffect(() => {
+    const sections = [
+      { ref: chartsRef, name: "charts" },
+      { ref: tablesRef, name: "tables" },
+      { ref: reportsRef, name: "reports" },
+      { ref: forecastRef, name: "forecast" },
+    ];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveTab(entry.target.getAttribute("data-section"));
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    sections.forEach((section) => {
+      if (section.ref.current) {
+        observer.observe(section.ref.current);
+      }
+    });
+
+    return () => {
+      sections.forEach((section) => {
+        if (section.ref.current) {
+          observer.unobserve(section.ref.current);
+        }
+      });
+    };
+  }, []);
+
   return (
     <Box
       minH="100vh"
@@ -47,43 +93,59 @@ export function Sidebar({ children }) {
       bgRepeat={"repeat"}
       bgSize={"contain"}
     >
-      <Router>
-        <SidebarContent
-          onClose={onClose}
-          display={{ base: "none", md: "block" }}
-        />
-        <Drawer
-          autoFocus={false}
-          isOpen={isOpen}
-          placement="left"
-          onClose={onClose}
-          returnFocusOnClose={false}
-          onOverlayClick={onClose}
-          size="xs"
-        >
-          <DrawerContent>
-            <SidebarContent onClose={onClose} />
-          </DrawerContent>
-        </Drawer>
+      <SidebarContent
+        onClose={onClose}
+        scrollToSection={scrollToSection}
+        refs={{ chartsRef, tablesRef, reportsRef, forecastRef }}
+        activeTab={activeTab}
+        display={{ base: "none", md: "block" }}
+      />
+      <Drawer
+        autoFocus={false}
+        isOpen={isOpen}
+        placement="left"
+        onClose={onClose}
+        returnFocusOnClose={false}
+        onOverlayClick={onClose}
+        size="xs"
+      >
+        <DrawerContent>
+          <SidebarContent
+            onClose={onClose}
+            scrollToSection={scrollToSection}
+            refs={{ chartsRef, tablesRef, reportsRef, forecastRef }}
+            activeTab={activeTab}
+          />
+        </DrawerContent>
+      </Drawer>
 
-        {/* mobilenav */}
-        <MobileNav display={{ base: "flex", md: "none" }} onOpen={onOpen} />
-        <Box ml={{ base: 0, md: 56 }} pl="4" pr="4" pt="12">
-          <Routes>
-            <Route path="/charts" element={<div>Charts Page</div>} />
-            <Route path="/tables" element={<Table/>} />
-            <Route path="/reports" element={<div>Reports Page</div>} />
-            <Route path="/forecast" element={<div>Forecast Page</div>} />
-            <Route path="/" element={<div>Home Page</div>} />
-          </Routes>
-          {children}
-        </Box>
-      </Router>
+      <MobileNav display={{ base: "flex", md: "none" }} onOpen={onOpen} />
+      <Box ml={{ base: 0, md: 56 }} pl="4" pr="4" pt="12">
+        <section ref={chartsRef} data-section="charts">
+          <Charts />
+        </section>
+        <section ref={tablesRef} data-section="tables">
+          <Table />
+        </section>
+        {/* <section ref={reportsRef} data-section="reports">
+            <Reports />
+          </section>
+          <section ref={forecastRef} data-section="forecast">
+            <Forecast />
+          </section> */}
+        {children}
+      </Box>
     </Box>
   );
 }
 
-const SidebarContent = ({ onClose, ...rest }) => {
+const SidebarContent = ({
+  onClose,
+  scrollToSection,
+  refs,
+  activeTab,
+  ...rest
+}) => {
   return (
     <Box
       transition="3s ease"
@@ -121,7 +183,10 @@ const SidebarContent = ({ onClose, ...rest }) => {
               key={link.name}
               icon={link.icon}
               path={link.path}
+              isActive={activeTab === link.path}
               onClose={onClose}
+              scrollToSection={scrollToSection}
+              sectionRef={refs[`${link.path}Ref`]}
             >
               {link.name}
             </NavItem>
@@ -199,39 +264,48 @@ const SidebarContent = ({ onClose, ...rest }) => {
   );
 };
 
-const NavItem = ({ icon, children, path, onClose, ...rest }) => {
+const NavItem = ({
+  icon,
+  children,
+  sectionRef,
+  scrollToSection,
+  isActive,
+  ...rest
+}) => {
   return (
-    <NavLink to={path} onClick={onClose}>
-      {({ isActive }) => (
-        <Flex
-          align="center"
-          p="4"
-          mx="4"
-          borderRadius="lg"
-          role="group"
-          cursor="pointer"
-          color="white"
-          bg={isActive ? "#0000ff33" : "transparent"}
-          _hover={{
-            bg: "#0000ff33",
-            color: "white",
-          }}
-          {...rest}
-        >
-          {icon && (
-            <Icon
-              mr="4"
-              fontSize="16"
-              _groupHover={{
-                color: "white",
-              }}
-              as={icon}
-            />
-          )}
-          {children}
-        </Flex>
-      )}
-    </NavLink>
+    <Box
+      onClick={() => {
+        scrollToSection(sectionRef, children.toLowerCase());
+      }}
+    >
+      <Flex
+        align="center"
+        p="4"
+        mx="4"
+        borderRadius="lg"
+        role="group"
+        cursor="pointer"
+        color="white"
+        bg={isActive ? "#0000ff33" : "transparent"}
+        _hover={{
+          bg: "#0000ff33",
+          color: "white",
+        }}
+        {...rest}
+      >
+        {icon && (
+          <Icon
+            mr="4"
+            fontSize="16"
+            _groupHover={{
+              color: "white",
+            }}
+            as={icon}
+          />
+        )}
+        {children}
+      </Flex>
+    </Box>
   );
 };
 
@@ -246,6 +320,9 @@ const MobileNav = ({ onOpen, ...rest }) => {
       borderBottomWidth="1px"
       borderBottomColor={useColorModeValue("gray.200", "gray.700")}
       gap={4}
+      top={0}
+      position={"sticky"}
+      zIndex={4}
       {...rest}
     >
       <IconButton
@@ -261,7 +338,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
         fontSize="2xl"
         fontFamily="monospace"
         fontWeight="bold"
-        color="white"
+        color="black"
       >
         Kaptive
       </Text>

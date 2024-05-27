@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import data from "../../db.json";
+import { Box } from "@chakra-ui/react";
 
 const months = [
   "Jan",
@@ -56,26 +57,30 @@ const monthlyData = months.map((month) => {
 });
 function SimpleBarChart() {
   return (
-    <ResponsiveContainer width="100%" height={300} >
-      <BarChart
-        data={monthlyData}
-        margin={{
-          top: 5,
-          right: 10,
-          left: 40,
-          bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="month" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar dataKey="Revenue" fill="#b789dc" />
-        <Bar dataKey="COGS" fill="#05adf3" />
-        <Bar dataKey="GrossProfit" fill="#eb7e32" />
-      </BarChart>
-    </ResponsiveContainer>
+    <Box overflowY={"auto"} w="100%">
+      <Box w={{base:"1100px",lg:"100%"}}>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart
+            data={monthlyData}
+            margin={{
+              top: 5,
+              right: 10,
+              left: 40,
+              bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="Revenue" fill="#b789dc" />
+            <Bar dataKey="COGS" fill="#05adf3" />
+            <Bar dataKey="GrossProfit" fill="#eb7e32" />
+          </BarChart>
+        </ResponsiveContainer>
+      </Box>
+    </Box>
   );
 }
 

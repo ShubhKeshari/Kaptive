@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
-  Box,
-} from "@chakra-ui/react";
+import { Table, Thead, Tbody, Tr, Th, Td, Box } from "@chakra-ui/react";
 import data from "../../db.json";
 const months = [
   "January",
@@ -26,8 +17,7 @@ const months = [
 ];
 const SimpleTable = () => {
   return (
-    <Box maxHeight={"300px"} overflowY={"auto"}>
-    <TableContainer>
+    <Box maxHeight={"500px"} overflow={"scroll"} width="100%">
       <Table size="sm">
         <Thead>
           <Tr>
@@ -64,7 +54,6 @@ const SimpleTable = () => {
           })}
         </Tbody>
       </Table>
-    </TableContainer>
     </Box>
   );
 };
